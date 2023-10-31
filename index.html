@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Interactuar con las Peticiones</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  </head>
+  <body>
+    <h1>Crear Usuario</h1>
+    <form id="crear-usuario-form">
+      <label for="usuario">Usuario:</label>
+      <input type="text" name="usuario" id="usuario" required />
+      <button type="submit">Crear Usuario</button>
+    </form>
+
+    <hr />
+
+    <h1>Validar Código 2FA</h1>
+    <form id="validar-codigo-form">
+      <label for="usuario_validar">Usuario:</label>
+      <input type="text" name="usuario" id="usuario_validar" required />
+      <label for="codigo_2fa">Código 2FA:</label>
+      <input type="text" name="codigo_2fa" id="codigo_2fa" required />
+      <button type="submit">Validar Código 2FA</button>
+    </form>
+
+    <hr />
+
+    <h1>Imagen del Código QR</h1>
+    <div id="imagen_qr_container"></div>
+
+    <script>
+      // Función para mostrar la imagen del código QR
+      function mostrarImagenQR(otpauth_url) {
+        var img = document.createElement("img");
+        img.src = "data:image/png;base64," + otpauth_url;
+        document.getElementById("imagen_qr_container").innerHTML = ""; // Limpia el contenedor
+        document.getElementById("imagen_qr_container").appendChild(img);
+      }
+
+      // Manejar el formulario de creación de usuario con AJAX
+      $("#crear-usuario-form").submit(function (e) {
+        e.preventDefault();
+        $.post(
+          "http://localhost:5000/crear_usuario",
+          $("#crear-usuario-form").serialize(),
+          function (data) {
+            mostrarImagenQR(data.imagen_qr_base64);
+          }
+        )
+          .done(function () {
+            // La solicitud fue exitosa
+            console.log("Solicitud completada exitosamente");
+          })
+          .fail(function (jqXHR, textStatus, errorThrown) {
+            // Manejar el error
+            console.error("Error en la solicitud:", textStatus, errorThrown);
+            alert(jqXHR.responseJSON.mensaje);
+          });
+      });
+
+      // Manejar el formulario de validación de código 2FA con AJAX
+      $("#validar-codigo-form").submit(function (e) {
+        e.preventDefault();
+        $.post(
+          "http://localhost:5000/validar_codigo_2fa",
+          $("#validar-codigo-form").serialize(),
+          function (data) {
+            alert(data.mensaje);
+          }
+        )
+          .done(function () {
+            // La solicitud fue exitosa
+            console.log("Solicitud completada exitosamente");
+          })
+          .fail(function (jqXHR, textStatus, errorThrown) {
+            // Manejar el error
+            console.error("Error en la solicitud:", textStatus, errorThrown);
+            alert(jqXHR.responseJSON.mensaje);
+          });
+      });
+    </script>
+  </body>
+</html>
